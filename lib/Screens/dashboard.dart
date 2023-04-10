@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mock_user_app/Screens/detail_user.dart';
+
 import 'package:mock_user_app/services/helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -14,13 +15,18 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  TextEditingController searchController = TextEditingController();
   List<UserRes> users = [];
+  List<UserRes> showList = [];
   bool isLoading = true;
+  bool isSearching = false;
 
   Future<void> loadUser() async {
     users = await Helper.getAllUser();
-    isLoading = false;
     debugPrint('userSize ${users.length}');
+    showList.addAll(users);
+    debugPrint("list is available");
+    isLoading = false;
     setState(() {});
   }
 
@@ -34,65 +40,108 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // title: isSearching ? searchTextField() : const Text('Users List'),
         title: const Text('Users List'),
         centerTitle: true,
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : users.isEmpty
-              ? const Center(
-                  child: Text(
-                  'No Data Found',
-                  style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.red),
-                ))
-              : ListView.builder(
-                  // shrinkWrap: true,
-                  itemCount: users.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final user = users[index];
-                    return InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => DetailUser(
-                                  id: user.id.toString(),
-                                )));
-                      },
-                      child: Card(
-                        margin:
-                            const EdgeInsets.only(top: 20, left: 10, right: 10),
-                        child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(60.0),
-                            child: CachedNetworkImage(
-                              imageUrl: user.url!,
-                              height: 50,
-                              width: 50,
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.name!,
-                                style: const TextStyle(fontSize: 22),
-                              ),
-                              const SizedBox(width: 10),
-                              Text("Age:- ${user.age.toString()}"),
-                            ],
-                          ),
-                          subtitle: Text(user.email!),
-                          trailing: buildTrailingButtons(user, context),
-                        ),
-                      ),
-                    );
+        /* actions: [
+          IconButton(
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: Search(showList),
+              );
+            },
+            icon: const Icon(Icons.search),
+          ),
+        ],*/
+        /*  actions: isSearching
+            ? [
+                IconButton(
+                  onPressed: () {
+                    isSearching = false;
+                    setState(() {});
                   },
+                  icon: const Icon(Icons.clear),
                 ),
+              ]
+            : [
+                IconButton(
+                  onPressed: () {
+                    isSearching = true;
+                    setState(() {});
+                  },
+                  icon: const Icon(Icons.search),
+                ),
+              ],*/
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 15, right: 10, left: 10),
+            child: searchTextField(),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : showList.isEmpty
+                    ? const Center(
+                        child: Text(
+                        'No Data Found',
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.red),
+                      ))
+                    : ListView.builder(
+                        // shrinkWrap: true,
+                        itemCount: showList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final user = showList[index];
+                          return InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => DetailUser(
+                                        id: user.id.toString(),
+                                      )));
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.only(
+                                  top: 20, left: 10, right: 10),
+                              child: ListTile(
+                                leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(60.0),
+                                  child: CachedNetworkImage(
+                                    imageUrl: user.url!,
+                                    height: 50,
+                                    width: 50,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                title: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      user.name!,
+                                      style: const TextStyle(fontSize: 22),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text("Age:- ${user.age.toString()}"),
+                                  ],
+                                ),
+                                subtitle: Text(user.email!),
+                                trailing: buildTrailingButtons(user, context),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -112,6 +161,41 @@ class _DashboardState extends State<Dashboard> {
           });
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget searchTextField() {
+    return SizedBox(
+      height: 40,
+      width: 300,
+      child: TextField(
+        controller: searchController,
+        cursorColor: Colors.purple,
+        autofocus: false,
+        cursorHeight: 22,
+        decoration: InputDecoration(
+          hintText: "Search...",
+          hintStyle: const TextStyle(color: Colors.purple),
+          filled: true,
+          fillColor: Colors.white54,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: Colors.black, width: 0.8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: const BorderSide(color: Colors.black, width: 0.8),
+          ),
+        ),
+        onChanged: (value) {
+          showList.clear();
+          showList = users
+              .where((items) =>
+                  (items.name!.toLowerCase().contains(value.toLowerCase())))
+              .toList();
+          setState(() {});
+        },
       ),
     );
   }
@@ -184,3 +268,40 @@ class _DashboardState extends State<Dashboard> {
         });
   }
 }
+
+/*class Search extends SearchDelegate {
+  Search(List<UserRes> showList);
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+          onPressed: () {
+            query = '';
+          },
+          icon: const Icon(Icons.clear))
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
+      },
+      icon: const Icon(Icons.arrow_back),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // TODO: implement buildSuggestions
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // TODO: implement buildSuggestions
+    throw UnimplementedError();
+  }
+}*/
