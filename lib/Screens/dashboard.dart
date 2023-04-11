@@ -23,10 +23,12 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> loadUser() async {
     users = await Helper.getAllUser();
-    debugPrint('userSize ${users.length}');
+    // debugPrint('userSize ${users.length}');
+    showList.clear();
     showList.addAll(users);
-    debugPrint("list is available");
     isLoading = false;
+    // debugPrint("list is available");
+
     setState(() {});
   }
 
@@ -40,8 +42,8 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: isSearching ? searchTextField() : const Text('Users List'),
-        title: const Text('Users List'),
+        title: isSearching ? searchTextField() : const Text('Users List'),
+        // title: const Text('Users List'),
         centerTitle: true,
         /* actions: [
           IconButton(
@@ -54,7 +56,7 @@ class _DashboardState extends State<Dashboard> {
             icon: const Icon(Icons.search),
           ),
         ],*/
-        /*  actions: isSearching
+        actions: isSearching
             ? [
                 IconButton(
                   onPressed: () {
@@ -72,76 +74,67 @@ class _DashboardState extends State<Dashboard> {
                   },
                   icon: const Icon(Icons.search),
                 ),
-              ],*/
+              ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 15, right: 10, left: 10),
-            child: searchTextField(),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : showList.isEmpty
-                    ? const Center(
-                        child: Text(
-                        'No Data Found',
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
-                            color: Colors.red),
-                      ))
-                    : ListView.builder(
-                        // shrinkWrap: true,
-                        itemCount: showList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final user = showList[index];
-                          return InkWell(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => DetailUser(
-                                        id: user.id.toString(),
-                                      )));
-                            },
-                            child: Card(
-                              margin: const EdgeInsets.only(
-                                  top: 20, left: 10, right: 10),
-                              child: ListTile(
-                                leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(60.0),
-                                  child: CachedNetworkImage(
-                                    imageUrl: user.url!,
-                                    height: 50,
-                                    width: 50,
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                                title: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      user.name!,
-                                      style: const TextStyle(fontSize: 22),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text("Age:- ${user.age.toString()}"),
-                                  ],
-                                ),
-                                subtitle: Text(user.email!),
-                                trailing: buildTrailingButtons(user, context),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : showList.isEmpty
+              ? const Center(
+                  child: Text(
+                  'No Data Found',
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.red),
+                ))
+              : Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: ListView.builder(
+                    // shrinkWrap: true,
+                    itemCount: showList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final user = showList[index];
+                      return InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => DetailUser(
+                                    id: user.id.toString(),
+                                  )));
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.only(
+                              top: 20, left: 15, right: 15),
+                          child: ListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(60.0),
+                              child: CachedNetworkImage(
+                                imageUrl: user.url!,
+                                height: 50,
+                                width: 50,
+                                fit: BoxFit.fill,
                               ),
                             ),
-                          );
-                        },
-                      ),
-          ),
-        ],
-      ),
+                            title: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name!,
+                                  style: const TextStyle(fontSize: 22),
+                                ),
+                                const SizedBox(width: 10),
+                                Text("Age:- ${user.age.toString()}"),
+                              ],
+                            ),
+                            subtitle: Text(user.email!),
+                            trailing: buildTrailingButtons(user, context),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -189,7 +182,6 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
         onChanged: (value) {
-          showList.clear();
           showList = users
               .where((items) =>
                   (items.name!.toLowerCase().contains(value.toLowerCase())))

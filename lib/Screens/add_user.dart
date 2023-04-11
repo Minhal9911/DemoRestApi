@@ -42,7 +42,7 @@ class _AddUserState extends State<AddUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         title: Text(widget.isAdd ? 'Add New User' : 'Edit User'),
         centerTitle: true,
       ),
