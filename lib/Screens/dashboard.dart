@@ -51,124 +51,116 @@ class _DashboardState extends State<Dashboard> {
         title: isSearching ? searchTextField() : const Text('Users List'),
         // title: const Text('Users List'),
         centerTitle: true,
-        /* actions: [
+
+        actions: isSearching
+            ? [
           IconButton(
             onPressed: () {
-              showSearch(
-                context: context,
-                delegate: Search(showList),
-              );
+              isSearching = false;
+              searchController.clear();
+              showList.clear();
+              showList.addAll(users);
+              setState(() {});
+            },
+            icon: const Icon(Icons.clear),
+          ),
+        ]
+            : [
+          IconButton(
+            onPressed: () {
+              isSearching = true;
+              setState(() {});
             },
             icon: const Icon(Icons.search),
           ),
-        ],*/
-        actions: isSearching
-            ? [
-                IconButton(
-                  onPressed: () {
-                    isSearching = false;
-                    searchController.clear();
-                    showList.clear();
-                    showList.addAll(users);
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.clear),
-                ),
-              ]
-            : [
-                IconButton(
-                  onPressed: () {
-                    isSearching = true;
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.search),
-                ),
-              ],
+        ],
       ),
       body: WillPopScope(
         onWillPop: _onWillPop,
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
             : showList.isEmpty
-                ? const Center(
-                    child: Text(
-                    'No Data Found',
-                    style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.red),
-                  ))
-                : Padding(
-                    padding: const EdgeInsets.only(top: 15),
-                    child: ListView.builder(
-                      // shrinkWrap: true,
-                      itemCount: showList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final user = showList[index];
-                        return InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DetailUser(
-                                  id: user.id.toString(),
-                                ),
-                              ),
-                            );
-                            showList.clear();
-                            showList.addAll(users);
-                          },
-                          child: Card(
-                            color: Colors.white60.withOpacity(0.8),
-                            shadowColor: Colors.purple,
-                            elevation: 3,
-                            margin: const EdgeInsets.only(
-                                top: 20, left: 15, right: 15),
-                            child: ListTile(
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(60.0),
-                                child: CachedNetworkImage(
-                                  imageUrl: user.url!,
-                                  height: 50,
-                                  width: 50,
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              title: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user.name!,
-                                    style: const TextStyle(fontSize: 22),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text("Age:- ${user.age.toString()}"),
-                                ],
-                              ),
-                              subtitle: Text(user.email!),
-                              trailing: buildTrailingButtons(user, context),
-                            ),
+            ? const Center(
+            child: Text(
+              'No Data Found',
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.red),
+            ))
+            : Padding(
+          padding: const EdgeInsets.only(top: 15),
+          child: ListView.builder(
+            // shrinkWrap: true,
+            itemCount: showList.length,
+            itemBuilder: (BuildContext context, int index) {
+              final user = showList[index];
+              return InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DetailUser(
+                            id: user.id.toString(),
                           ),
-                        );
-                      },
                     ),
+                  );
+                  showList.clear();
+                  showList.addAll(users);
+                },
+                child: Card(
+                  color: Colors.white60.withOpacity(0.8),
+                  shadowColor: Colors.purple,
+                  elevation: 3,
+                  margin: const EdgeInsets.only(
+                      top: 20, left: 15, right: 15),
+                  child: ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(60.0),
+                      child: CachedNetworkImage(
+                        imageUrl: user.url!,
+                        height: 50,
+                        width: 50,
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    title: Column(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name!,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        const SizedBox(width: 10),
+                        Text("Age:- ${user.age.toString()}"),
+                      ],
+                    ),
+                    subtitle: Text(user.email!),
+                    trailing: buildTrailingButtons(user, context),
                   ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const AddUser(
-                        name: '',
-                        age: '',
-                        email: '',
-                        pass: '',
-                        isAdd: true,
-                        id: '',
-                      ))).then((value) {
+                  builder: (context) =>
+                  const AddUser(
+                    name: '',
+                    age: '',
+                    email: '',
+                    pass: '',
+                    isAdd: true,
+                    id: '',
+                  ))).then((value) {
             if (value == true) {
               loadUser();
             }
@@ -188,21 +180,23 @@ class _DashboardState extends State<Dashboard> {
     } else {
       bool result = await showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Confirm ?"),
-          content: const Text("Do you want to exit the app?"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("No"),
+        builder: (context) =>
+            AlertDialog(
+              title: const Text("Confirm ?"),
+              content: const Text("Do you want to exit the app?"),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text("No"),
+                ),
+                TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text("Yes"))
+              ],
             ),
-            TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text("Yes"))
-          ],
-        ),
       );
-      return Future.value(result);
+      // return Future.value(result);
+      return result;
     }
   }
 
@@ -232,7 +226,7 @@ class _DashboardState extends State<Dashboard> {
         onChanged: (value) {
           showList = users
               .where((items) =>
-                  (items.name!.toLowerCase().contains(value.toLowerCase())))
+          (items.name!.toLowerCase().contains(value.toLowerCase())))
               .toList();
           setState(() {});
         },
@@ -248,7 +242,7 @@ class _DashboardState extends State<Dashboard> {
           size: 28,
         ),
         shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         position: PopupMenuPosition.under,
         constraints: const BoxConstraints(
           minWidth: 80.0,
@@ -264,7 +258,8 @@ class _DashboardState extends State<Dashboard> {
                   Navigator.pop(context);
                   Navigator.of(context)
                       .push(MaterialPageRoute(
-                          builder: (context) => AddUser(
+                      builder: (context) =>
+                          AddUser(
                               name: user.name!,
                               age: user.age!.toString(),
                               email: user.email!,
@@ -310,40 +305,3 @@ class _DashboardState extends State<Dashboard> {
         });
   }
 }
-
-/*class Search extends SearchDelegate {
-  Search(List<UserRes> showList);
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-          onPressed: () {
-            query = '';
-          },
-          icon: const Icon(Icons.clear))
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        close(context, null);
-      },
-      icon: const Icon(Icons.arrow_back),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    // TODO: implement buildSuggestions
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // TODO: implement buildSuggestions
-    throw UnimplementedError();
-  }
-}*/
