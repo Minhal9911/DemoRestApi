@@ -39,6 +39,12 @@ class _DashboardState extends State<Dashboard> {
   }
 
   @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -61,6 +67,9 @@ class _DashboardState extends State<Dashboard> {
                 IconButton(
                   onPressed: () {
                     isSearching = false;
+                    searchController.clear();
+                    showList.clear();
+                    showList.addAll(users);
                     setState(() {});
                   },
                   icon: const Icon(Icons.clear),
@@ -76,65 +85,77 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : showList.isEmpty
-              ? const Center(
-                  child: Text(
-                  'No Data Found',
-                  style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.red),
-                ))
-              : Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: ListView.builder(
-                    // shrinkWrap: true,
-                    itemCount: showList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final user = showList[index];
-                      return InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => DetailUser(
-                                    id: user.id.toString(),
-                                  )));
-                        },
-                        child: Card(
-                          margin: const EdgeInsets.only(
-                              top: 20, left: 15, right: 15),
-                          child: ListTile(
-                            leading: ClipRRect(
-                              borderRadius: BorderRadius.circular(60.0),
-                              child: CachedNetworkImage(
-                                imageUrl: user.url!,
-                                height: 50,
-                                width: 50,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            title: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.name!,
-                                  style: const TextStyle(fontSize: 22),
+      body: WillPopScope(
+        onWillPop: _onWillPop,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : showList.isEmpty
+                ? const Center(
+                    child: Text(
+                    'No Data Found',
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.red),
+                  ))
+                : Padding(
+                    padding: const EdgeInsets.only(top: 15),
+                    child: ListView.builder(
+                      // shrinkWrap: true,
+                      itemCount: showList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final user = showList[index];
+                        return InkWell(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => DetailUser(
+                                  id: user.id.toString(),
                                 ),
-                                const SizedBox(width: 10),
-                                Text("Age:- ${user.age.toString()}"),
-                              ],
+                              ),
+                            );
+                            showList.clear();
+                            showList.addAll(users);
+                          },
+                          child: Card(
+                            color: Colors.white60.withOpacity(0.8),
+                            shadowColor: Colors.purple,
+                            elevation: 3,
+                            margin: const EdgeInsets.only(
+                                top: 20, left: 15, right: 15),
+                            child: ListTile(
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(60.0),
+                                child: CachedNetworkImage(
+                                  imageUrl: user.url!,
+                                  height: 50,
+                                  width: 50,
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                              title: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    user.name!,
+                                    style: const TextStyle(fontSize: 22),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text("Age:- ${user.age.toString()}"),
+                                ],
+                              ),
+                              subtitle: Text(user.email!),
+                              trailing: buildTrailingButtons(user, context),
                             ),
-                            subtitle: Text(user.email!),
-                            trailing: buildTrailingButtons(user, context),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -158,6 +179,33 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  Future<bool> _onWillPop() async {
+    if (isSearching == true) {
+      setState(() {
+        isSearching = false;
+      });
+      return false;
+    } else {
+      bool result = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Confirm ?"),
+          content: const Text("Do you want to exit the app?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("No"),
+            ),
+            TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text("Yes"))
+          ],
+        ),
+      );
+      return Future.value(result);
+    }
+  }
+
   Widget searchTextField() {
     return SizedBox(
       height: 40,
@@ -165,7 +213,7 @@ class _DashboardState extends State<Dashboard> {
       child: TextField(
         controller: searchController,
         cursorColor: Colors.purple,
-        autofocus: false,
+        autofocus: true,
         cursorHeight: 22,
         decoration: InputDecoration(
           hintText: "Search...",
@@ -225,6 +273,8 @@ class _DashboardState extends State<Dashboard> {
                               id: user.id!)))
                       .then((value) {
                     if (value == true) {
+                      isSearching = false;
+                      searchController.clear();
                       loadUser();
                     }
                   });
