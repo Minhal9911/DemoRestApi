@@ -22,8 +22,8 @@ class _DetailUserState extends State<DetailUser> {
 
   @override
   void initState() {
-    getUser();
     super.initState();
+    getUser();
   }
 
   @override

@@ -37,6 +37,14 @@ class _AddUserState extends State<AddUser> {
     emailController.text = widget.email;
     passController.text = widget.pass;
   }
+  @override
+  void dispose() {
+    nameController.dispose();
+    ageController.dispose();
+    emailController.dispose();
+    passController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

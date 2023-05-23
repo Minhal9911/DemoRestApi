@@ -34,8 +34,8 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    loadUser();
     super.initState();
+    loadUser();
   }
 
   @override
@@ -157,11 +157,13 @@ class _DashboardState extends State<Dashboard> {
                         pass: '',
                         isAdd: true,
                         id: '',
-                      ))).then((value) {
-            if (value == true) {
-              loadUser();
-            }
-          });
+                      ))).then(
+            (value) {
+              if (value == true) {
+                loadUser();
+              }
+            },
+          );
         },
         child: const Icon(Icons.add),
       ),
