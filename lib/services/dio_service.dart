@@ -19,10 +19,10 @@ class ApiServices {
       debugPrint(response.data.toString());
       if (response.statusCode == 200) {
         debugPrint('getting data');
-        return (response.data as List).map((e) => UserRes.fromJson(e)).toList();
-        /* List<UserRes> users =
+        // return (response.data as List).map((e) => UserRes.fromJson(e)).toList();
+        List<UserRes> users =
             List<UserRes>.from(response.data.map((x) => UserRes.fromJson(x)));
-        return users;*/
+        return users;
       } else {
         return [];
       }
