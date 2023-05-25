@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mock_user_app/services/dio_service.dart';
 import 'package:mock_user_app/services/helper.dart';
 import 'package:mock_user_app/model/user_req.dart';
 
@@ -240,7 +241,7 @@ class _AddUserState extends State<AddUser> {
         age: age,
         url:
             "https://www.citypng.com/public/uploads/small/11640168385jtmh7kpmvna5ddyynoxsjy5leb1nmpvqooaavkrjmt9zs7vtvuqi4lcwofkzsaejalxn7ggpim4hkg0wbwtzsrp1ldijzbdbsj5z.png");
-    await Helper.addUser(userReq.toJson());
+    await ApiServices.addUser(userReq.toJson());
     setState(() {});
   }
 
@@ -258,7 +259,7 @@ class _AddUserState extends State<AddUser> {
         age: age,
         url:
             "https://www.citypng.com/public/uploads/small/11640168385jtmh7kpmvna5ddyynoxsjy5leb1nmpvqooaavkrjmt9zs7vtvuqi4lcwofkzsaejalxn7ggpim4hkg0wbwtzsrp1ldijzbdbsj5z.png");
-    await Helper.updateUser(userReq.toJson(), widget.id);
+    await ApiServices.updateUser(userReq.toJson(), widget.id);
     setState(() {});
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:mock_user_app/services/dio_service.dart';
 import 'package:mock_user_app/services/helper.dart';
 
 import '../model/user_req_id.dart';
@@ -16,7 +17,7 @@ class _DetailUserState extends State<DetailUser> {
   UserReqIdModel? user;
 
   Future<void> getUser() async {
-    user = await Helper.getUserById(widget.id);
+    user = await ApiServices.getUserById(widget.id);
     setState(() {});
   }
 

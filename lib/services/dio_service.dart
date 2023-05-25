@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-import '../model/all_user_res.dart';
 import '../model/user_req_id.dart';
 import '../model/user_res.dart';
 
@@ -12,33 +11,35 @@ class ApiServices {
   static const updateUserUrl = '/user/';
   static const deleteUserUrl = '/user/';
 
-  final dio = Dio(BaseOptions(baseUrl: 'http://3.109.153.198:8080'));
+  static final dio = Dio(BaseOptions(baseUrl: 'http://3.109.153.198:8080'));
 
-  Future<List<UserRes>> getAllUser() async {
+  static Future<List<UserRes>> getAllUser() async {
     try {
       var response = await dio.get(getAllUserUrl);
       debugPrint(response.data.toString());
       if (response.statusCode == 200) {
         debugPrint('getting data');
-        List<UserRes> users = userResFromJson(response.data.toString());
-        return users;
+        return (response.data as List).map((e) => UserRes.fromJson(e)).toList();
+        /* List<UserRes> users =
+            List<UserRes>.from(response.data.map((x) => UserRes.fromJson(x)));
+        return users;*/
       } else {
         return [];
       }
-    } catch (e) {
+    } on DioError catch (e) {
       debugPrint('error: ${e.toString()}');
       return [];
     }
   }
 
-  Future<UserReqIdModel?> getUserById(String id) async {
+  static Future<UserReqIdModel?> getUserById(String id) async {
     try {
       var response = await dio.get('$getUserByIdUrl$id');
       debugPrint(response.data.toString());
       if (response.statusCode == 200) {
         debugPrint('getting data by id');
-        UserReqIdModel getData =
-            userReqIdModelFromJson(response.data.toString());
+        UserReqIdModel getData = UserReqIdModel.fromJson(response.data);
+        // debugPrint('data got by id done');
         return getData;
       }
     } catch (e) {
@@ -47,32 +48,33 @@ class ApiServices {
     return null;
   }
 
-  Future<void> addUser(Map<String, dynamic> data) async {
+  static Future<void> addUser(Map<String, dynamic> data) async {
     try {
       var response = await dio.post(addUserUrl, data: data);
       debugPrint(response.data.toString());
       if (response.statusCode == 200) {
         debugPrint('adding data');
       }
-    } catch (e) {
+    } on DioError catch (e) {
       debugPrint('error:${e.toString()}');
     }
   }
 
-  Future<UserRes?> updateUser(Map<String, dynamic> data, String id) async {
+  static Future<UserRes?> updateUser(
+      Map<String, dynamic> data, String id) async {
     try {
       var response = await dio.put('$updateUserUrl$id', data: data);
       debugPrint('updating data');
       if (response.statusCode == 200) {
         debugPrint('Edit success');
       }
-    } catch (e) {
+    } on DioError catch (e) {
       debugPrint('error:${e.toString()}');
     }
     return null;
   }
 
-  Future<bool> deleteUser(String id) async {
+  static Future<bool> deleteUser(String id) async {
     bool status = false;
     try {
       var response = await dio.delete('$deleteUserUrl$id');
@@ -82,7 +84,7 @@ class ApiServices {
         status = true;
       }
       return status;
-    } catch (e) {
+    } on DioError catch (e) {
       debugPrint(e.toString());
       return status;
     }

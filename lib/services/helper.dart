@@ -37,8 +37,7 @@ class Helper {
       var response = await client.get(Uri.http(baseUrl, '$getUserByIdUrl$id'));
       // debugPrint(response.body);
       if (response.statusCode == 200) {
-        UserReqIdModel getData =
-            userReqIdModelFromJson(response.body.toString());
+        UserReqIdModel getData = userReqIdModelFromJson(response.body);
         return getData;
       }
     } catch (e) {

@@ -1,8 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mock_user_app/Screens/detail_user.dart';
-
-import 'package:mock_user_app/services/helper.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:mock_user_app/services/dio_service.dart';
 
 import '../model/user_res.dart';
 import 'add_user.dart';
@@ -22,7 +21,7 @@ class _DashboardState extends State<Dashboard> {
   bool isSearching = false;
 
   Future<void> loadUser() async {
-    users = await Helper.getAllUser();
+    users = await ApiServices.getAllUser();
     // debugPrint('userSize ${users.length}');
     showList.clear();
     showList.addAll(users);
@@ -284,7 +283,7 @@ class _DashboardState extends State<Dashboard> {
             PopupMenuItem(
               child: TextButton.icon(
                 onPressed: () {
-                  Helper.deleteUser(user.id!).then((value) {
+                  ApiServices.deleteUser(user.id!).then((value) {
                     if (value) {
                       Navigator.pop(context);
                       loadUser();
